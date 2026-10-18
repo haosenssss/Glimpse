@@ -135,7 +135,8 @@ public struct SettingsStore: Sendable {
         guard let data = defaults.data(forKey: Self.key),
               let settings = try? JSONDecoder().decode(AppSettings.self, from: data)
         else { return .default }
-        return settings
+        guard DefaultPrompt.previousVersions.contains(settings.systemPrompt) else { return settings }
+        return settings.with(\.systemPrompt, DefaultPrompt.text)
     }
 
     public func save(_ settings: AppSettings) {
