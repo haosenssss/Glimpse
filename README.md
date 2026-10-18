@@ -30,17 +30,7 @@ Press **Esc** at any point to cancel. Return and Esc are only intercepted while 
 
 ## Set up a model
 
-Open **Model** in the menu, then set the base URL, paste your API key, and pick a model from the list. Any OpenAI-compatible endpoint that accepts images will work:
-
-| Provider | Base URL | Example model |
-|---|---|---|
-| OpenAI | `https://api.openai.com/v1` | `gpt-4o` |
-| Google Gemini | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash` |
-| OpenRouter | `https://openrouter.ai/api/v1` | `google/gemini-2.5-flash` |
-| Qwen (DashScope) | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-vl-max` |
-| Ollama (local) | `http://localhost:11434/v1` | `llava` |
-
-The model has to accept images; text-only APIs such as DeepSeek's will reply that they can't see anything. When a provider says which models take images (OpenRouter does), the list only shows those. If you forget the trailing `/v1`, Glimpse adds it for you.
+Open **Model** in the menu, set the base URL, paste your API key, and pick a model from the list. Any OpenAI-compatible endpoint works, as long as the model accepts images.
 
 ## The menu
 
@@ -54,8 +44,6 @@ Shortcuts        capture · quit
 Indicator        size · opacity · drag to any position
 Permissions      Accessibility · Screen Recording
 ```
-
-The default system prompt is tuned for exam-style questions: letters for multiple choice, full working for calculations, no explanations. Edit it to suit whatever you use Glimpse for.
 
 ## Privacy
 
