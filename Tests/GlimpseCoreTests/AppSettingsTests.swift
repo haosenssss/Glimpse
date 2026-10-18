@@ -66,6 +66,25 @@ import Testing
         #expect(hotkey.displayString == "⌃⌥⇧⌘G")
     }
 
+    @Test func commandPlusSingleKeyIsReservedByApps() {
+        #expect(Hotkey(keyCode: 7, modifiers: Hotkey.command, keyLabel: "X").isReservedByApps)
+        #expect(!Hotkey(keyCode: 7, modifiers: Hotkey.command | Hotkey.shift, keyLabel: "X").isReservedByApps)
+        #expect(!Hotkey(keyCode: 7, modifiers: Hotkey.control | Hotkey.option, keyLabel: "X").isReservedByApps)
+        #expect(!Hotkey(keyCode: 122, modifiers: Hotkey.command, keyLabel: "F1").isReservedByApps)
+    }
+
+    @Test func savedReservedHotkeysFallBackToDefaults() {
+        let store = SettingsStore(defaults: makeDefaults())
+        let commandX = Hotkey(keyCode: 7, modifiers: Hotkey.command, keyLabel: "X")
+        let commandC = Hotkey(keyCode: 8, modifiers: Hotkey.command, keyLabel: "C")
+        store.save(AppSettings.default.with(\.quitHotkey, commandX).with(\.captureHotkey, commandC).with(\.model, "m"))
+
+        let loaded = store.load()
+        #expect(loaded.quitHotkey == AppSettings.default.quitHotkey)
+        #expect(loaded.captureHotkey == AppSettings.default.captureHotkey)
+        #expect(loaded.model == "m")
+    }
+
     @Test func indicatorSettingsAreClamped() {
         let clamped = IndicatorSettings(size: 100, opacity: 5, centerX: nil, centerY: nil).clamped()
         #expect(clamped.size == IndicatorSettings.sizeRange.upperBound)

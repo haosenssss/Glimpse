@@ -41,7 +41,7 @@ enum Dialogs {
     static func recordShortcut(for name: String) -> Hotkey? {
         let alert = makeAlert(
             title: "Press the new \(name) shortcut",
-            message: "Use ⌘, ⌃ or ⌥ together with a key (F-keys work alone). Esc cancels.",
+            message: "Use ⌃ or ⌥ with a key, or ⌘ with ⌃, ⌥ or ⇧ (⌘ plus a single key belongs to other apps). F-keys work alone. Esc cancels.",
             buttons: ["Cancel"]
         )
         var recorded: Hotkey?

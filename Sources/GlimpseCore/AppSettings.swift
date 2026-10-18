@@ -23,6 +23,12 @@ public struct Hotkey: Codable, Equatable, Hashable, Sendable {
         return symbols.filter { modifiers & $0.0 != 0 }.map(\.1).joined() + keyLabel
     }
 
+    /// ⌘ plus a single key (⌘C, ⌘X, ⌘Q…) belongs to the frontmost app; a global hotkey would steal it everywhere.
+    public var isReservedByApps: Bool {
+        let isFunctionKey = keyLabel.count > 1 && keyLabel.hasPrefix("F")
+        return modifiers == Self.command && !isFunctionKey
+    }
+
     public static func == (lhs: Hotkey, rhs: Hotkey) -> Bool {
         lhs.keyCode == rhs.keyCode && lhs.modifiers == rhs.modifiers
     }
@@ -135,8 +141,17 @@ public struct SettingsStore: Sendable {
         guard let data = defaults.data(forKey: Self.key),
               let settings = try? JSONDecoder().decode(AppSettings.self, from: data)
         else { return .default }
-        guard DefaultPrompt.previousVersions.contains(settings.systemPrompt) else { return settings }
-        return settings.with(\.systemPrompt, DefaultPrompt.text)
+        return Self.migrated(settings)
+    }
+
+    /// Upgrades an untouched old default prompt and drops hotkeys that would steal app shortcuts.
+    private static func migrated(_ settings: AppSettings) -> AppSettings {
+        let fallback = AppSettings.default
+        let prompt = DefaultPrompt.previousVersions.contains(settings.systemPrompt) ? DefaultPrompt.text : settings.systemPrompt
+        return settings
+            .with(\.systemPrompt, prompt)
+            .with(\.captureHotkey, settings.captureHotkey.isReservedByApps ? fallback.captureHotkey : settings.captureHotkey)
+            .with(\.quitHotkey, settings.quitHotkey.isReservedByApps ? fallback.quitHotkey : settings.quitHotkey)
     }
 
     public func save(_ settings: AppSettings) {

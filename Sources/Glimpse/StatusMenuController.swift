@@ -50,7 +50,8 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         cancel.isEnabled = coordinator.phase.isBusy
         items += [historyMenu(), cancel, .separator()]
         items += settingsMenus()
-        items += [.separator(), ActionMenuItem("Quit Glimpse", key: "q") { NSApp.terminate(nil) }]
+        let quit = ActionMenuItem("Quit Glimpse") { NSApp.terminate(nil) }
+        items += [.separator(), quit.showingShortcut(coordinator.settings.quitHotkey)]
         return items
     }
 

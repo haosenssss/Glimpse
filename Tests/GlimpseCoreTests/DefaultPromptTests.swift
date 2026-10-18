@@ -15,12 +15,13 @@ import Testing
         defaults.set(try! JSONEncoder().encode(settings), forKey: SettingsStore.key)
     }
 
-    @Test func savedOldDefaultIsUpgradedToCurrentDefault() throws {
-        let defaults = makeDefaults()
-        let oldDefault = try #require(DefaultPrompt.previousVersions.first)
-        store(prompt: oldDefault, in: defaults)
-
-        #expect(SettingsStore(defaults: defaults).load().systemPrompt == DefaultPrompt.text)
+    @Test func everySavedOldDefaultIsUpgradedToCurrentDefault() {
+        #expect(DefaultPrompt.previousVersions.count >= 2)
+        for oldDefault in DefaultPrompt.previousVersions {
+            let defaults = makeDefaults()
+            store(prompt: oldDefault, in: defaults)
+            #expect(SettingsStore(defaults: defaults).load().systemPrompt == DefaultPrompt.text)
+        }
     }
 
     @Test func customPromptIsLeftAlone() {
@@ -38,6 +39,15 @@ import Testing
         let prompt = DefaultPrompt.text
         #expect(prompt.contains("one short paragraph"))
         #expect(prompt.contains("No Markdown"))
-        #expect(prompt.contains("Answer:"))
+        #expect(prompt.contains("Thus, the answer is"))
+        #expect(!prompt.contains("numbered"))
+        #expect(!prompt.contains("Answer:"))
+    }
+
+    @Test func exampleStepsAreUnnumbered() throws {
+        let example = try #require(DefaultPrompt.text.components(separatedBy: "Example of a worked solution:").last)
+        let lines = example.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }
+        #expect(lines.count >= 2)
+        #expect(lines.allSatisfy { $0.first?.isNumber != true })
     }
 }

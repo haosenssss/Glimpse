@@ -136,32 +136,8 @@ extension StatusMenuController {
         ])
     }
 
-    /// Shows the current shortcut right-aligned, the way macOS menus show key equivalents.
     private func shortcutRow(_ title: String, current: Hotkey, action: @escaping @MainActor () -> Void) -> NSMenuItem {
-        let item = ActionMenuItem(title, handler: deferred(action))
-        guard let equivalent = Self.keyEquivalent(for: current) else {
-            item.title = "\(title)  \(current.displayString)"
-            return item
-        }
-        item.keyEquivalent = equivalent
-        item.keyEquivalentModifierMask = Self.modifierMask(for: current)
-        return item
-    }
-
-    private static func keyEquivalent(for hotkey: Hotkey) -> String? {
-        guard hotkey.keyLabel.count == 1, let scalar = hotkey.keyLabel.unicodeScalars.first,
-              CharacterSet.alphanumerics.contains(scalar) || CharacterSet.punctuationCharacters.contains(scalar)
-        else { return nil }
-        return hotkey.keyLabel.lowercased()
-    }
-
-    private static func modifierMask(for hotkey: Hotkey) -> NSEvent.ModifierFlags {
-        var mask: NSEvent.ModifierFlags = []
-        if hotkey.modifiers & Hotkey.command != 0 { mask.insert(.command) }
-        if hotkey.modifiers & Hotkey.shift != 0 { mask.insert(.shift) }
-        if hotkey.modifiers & Hotkey.option != 0 { mask.insert(.option) }
-        if hotkey.modifiers & Hotkey.control != 0 { mask.insert(.control) }
-        return mask
+        ActionMenuItem(title, handler: deferred(action)).showingShortcut(current)
     }
 
     /// Runs inside `performModal`, so the current shortcuts can't swallow the keystroke being recorded.

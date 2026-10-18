@@ -25,7 +25,8 @@ enum HotkeyCapture {
         // Shift alone would steal ordinary typing, so require ⌘, ⌃ or ⌥ (F-keys excepted).
         let hasStrongModifier = modifiers & (Hotkey.command | Hotkey.control | Hotkey.option) != 0
         guard hasStrongModifier || isFunctionKey, let label = label(for: event) else { return nil }
-        return Hotkey(keyCode: UInt32(event.keyCode), modifiers: modifiers, keyLabel: label)
+        let hotkey = Hotkey(keyCode: UInt32(event.keyCode), modifiers: modifiers, keyLabel: label)
+        return hotkey.isReservedByApps ? nil : hotkey
     }
 
     private static func carbonModifiers(_ flags: NSEvent.ModifierFlags) -> UInt32 {
