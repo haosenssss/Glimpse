@@ -2,10 +2,79 @@
 
 <h1 align="center">Glimpse</h1>
 
-Glimpse is a small macOS menu-bar app for answering questions on your screen. Press the shortcut (⌃⌥G by default), drag a box around a question, and the screenshot goes to a vision model you pick. A faint ring spins while it thinks and closes with a check when the answer is ready. Press Return and the answer is pasted at your cursor; press Esc to throw it away.
+<p align="center">
+  Screenshot a question, paste the answer.<br>
+  <a href="https://github.com/haosenssss/Glimpse/releases/latest">Download</a> · macOS 14+ · Apple Silicon · MIT
+</p>
 
-There is no window. The model, API key, system prompt, shortcuts, and the indicator's size and position all live in the menu-bar icon's menu, along with a short history of recent answers. Any OpenAI-compatible endpoint that accepts images will work, including OpenAI, OpenRouter, Gemini, Qwen-VL, and local servers such as Ollama. Your API key is stored in the Keychain. Screenshots and answers are kept in memory only and disappear when you quit.
+Glimpse is a small macOS menu-bar app for answering questions on your screen. You drag a box around a question, a vision model of your choice reads it, and the answer is typed in wherever your cursor is. There is no window to switch to and nothing on screen except a faint indicator while it works.
 
-To build and install into /Applications, run `scripts/install.sh`. You need macOS 14 or later, and the Command Line Tools are enough. If you have an Apple Development certificate, the script signs the app with it, so the Accessibility and Screen Recording permissions survive rebuilds. Run the tests with `scripts/spm.sh test`. That script is plain `swift` plus a workaround for a broken Command Line Tools install that only kicks in when needed.
+## How it works
 
-MIT licensed.
+| Step | What you do | What you see |
+|---|---|---|
+| 1 | Press **⌃⌥G** and drag over a question | A hairline selection box. Focus stays in the app you were using. |
+| 2 | Wait a few seconds | A small ring spinning in a corner of the screen |
+| 3 | Press **Return** | The ring closes with a check, then the answer is pasted at the cursor |
+
+Press **Esc** at any point to cancel. Return and Esc are only intercepted while an answer is pending, and an answer you don't paste expires after a minute (it stays in History).
+
+## Install
+
+1. Download `Glimpse-x.y.z.zip` from [Releases](https://github.com/haosenssss/Glimpse/releases/latest), unzip it, and move `Glimpse.app` to Applications.
+2. The app isn't notarized, so macOS blocks the first launch. Open **System Settings → Privacy & Security** and click **Open Anyway**, or run:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/Glimpse.app
+   ```
+3. Click the menu-bar icon and grant both items under **Permissions**: Accessibility (to paste) and Screen Recording (to capture).
+
+## Set up a model
+
+Open **Model** in the menu, then set the base URL, paste your API key, and pick a model from the list. Any OpenAI-compatible endpoint that accepts images will work:
+
+| Provider | Base URL | Example model |
+|---|---|---|
+| OpenAI | `https://api.openai.com/v1` | `gpt-4o` |
+| Google Gemini | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-2.5-flash` |
+| OpenRouter | `https://openrouter.ai/api/v1` | `google/gemini-2.5-flash` |
+| Qwen (DashScope) | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-vl-max` |
+| Ollama (local) | `http://localhost:11434/v1` | `llava` |
+
+The model has to accept images; text-only APIs such as DeepSeek's will reply that they can't see anything. When a provider says which models take images (OpenRouter does), the list only shows those. If you forget the trailing `/v1`, Glimpse adds it for you.
+
+## The menu
+
+Everything is set from the menu-bar icon, and changes apply immediately:
+
+```
+History          recent answers (click to copy) · Show Last Screenshot
+Model            base URL · API key · model · timeout
+System Prompt    edit · reset to default
+Shortcuts        capture · quit
+Indicator        size · opacity · drag to any position
+Permissions      Accessibility · Screen Recording
+```
+
+The default system prompt is tuned for exam-style questions: letters for multiple choice, full working for calculations, no explanations. Edit it to suit whatever you use Glimpse for.
+
+## Privacy
+
+- Your API key is stored in the macOS Keychain.
+- Screenshots, answers, and history live in memory only and are gone when you quit.
+- Requests go straight to the endpoint you configured over HTTPS (plain HTTP is only allowed for localhost), with no caching.
+
+## Build from source
+
+You need macOS 14 or later and the Xcode Command Line Tools.
+
+```bash
+scripts/spm.sh test      # run the tests
+scripts/install.sh       # build, sign and copy to /Applications
+scripts/release.sh       # build the distributable zip
+```
+
+`install.sh` signs with your Apple Development certificate if you have one, so permissions survive rebuilds. `spm.sh` is plain `swift` plus a workaround for a broken Command Line Tools install that only kicks in when needed.
+
+## License
+
+MIT
